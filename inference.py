@@ -1,16 +1,21 @@
 import argparse
+import importlib
 import os
 import torch
-from gpt import GPTLanguageModel, device, encode, decode, stoi
 
 parser = argparse.ArgumentParser(description='generate text from saved GPT weights')
-parser.add_argument('--ckpt', default='gpt.pt', help='weights file produced by train.py')
+parser.add_argument('--model', default='gpt', help='model module the weights belong to: gpt, gpt_rope, ...')
+parser.add_argument('--ckpt', default=None, help='weights file (default: <model>.pt, or e.g. runs/<run>/best.pt)')
 parser.add_argument('--tokens', type=int, default=500, help='characters to generate per sample')
 parser.add_argument('--samples', type=int, default=1, help='number of samples')
 parser.add_argument('--prompt', default='', help='starting text')
 parser.add_argument('--seed', type=int, default=None, help='seed for reproducible output (default: random)')
 parser.add_argument('--out', default=None, help='also write the samples to this file')
 args = parser.parse_args()
+
+gpt = importlib.import_module(args.model.removesuffix('.py'))
+GPTLanguageModel, device, encode, decode, stoi = gpt.GPTLanguageModel, gpt.device, gpt.encode, gpt.decode, gpt.stoi
+args.ckpt = args.ckpt or f"{gpt.__name__}.pt"
 
 if not os.path.exists(args.ckpt):
     raise SystemExit(f"{args.ckpt} not found - run train.py first")

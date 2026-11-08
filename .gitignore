@@ -16221,3 +16221,5 @@
 /.venv/Scripts/torchrun.exe
 /.venv/share/man/man1/isympy.1
 /.venv/pyvenv.cfg
+/.venv/
+/runs/
